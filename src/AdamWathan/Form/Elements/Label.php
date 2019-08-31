@@ -8,7 +8,7 @@ class Label extends Element
 
     public function __construct($label)
     {
-        $this->label = $label;
+        $this->label = __($label);
     }
 
     public function render()
