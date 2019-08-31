@@ -1,5 +1,7 @@
 <?php namespace AdamWathan\Form\Elements;
 
+use Illuminate\Support\Arr;
+
 abstract class Element
 {
     protected $attributes = array();
@@ -18,9 +20,9 @@ abstract class Element
         unset($this->attributes[$attribute]);
     }
 
-    public function getAttribute($attribute)
+    public function getAttribute($attribute, $default = null)
     {
-        return $this->attributes[$attribute];
+        return Arr::get($this->attributes, $attribute, $default);
     }
 
     public function data($attribute, $value)
@@ -98,6 +100,60 @@ abstract class Element
         }
 
         return $result;
+    }
+
+    public function parsley(string $label)
+    {
+        $label = __($label);
+        $type  = $this->getAttribute('type');
+
+        if ($this->getAttribute('required')) {
+            $this->attribute('data-parsley-required-message', __('validation.required', [
+                'attribute' => $label,
+            ]));
+        }
+
+        if ($maxlength = $this->getAttribute('maxlength')) {
+            $this->attribute('data-parsley-maxlength-message', __('validation.max.string', [
+                'attribute' => $label,
+                'max'       => $maxlength,
+            ]));
+        }
+
+        if ($minlength = $this->getAttribute('minlength')) {
+            $this->attribute('data-parsley-minlength-message', __('validation.min.string', [
+                'attribute' => $label,
+                'min'       => $minlength,
+            ]));
+        }
+
+        if ($this->getAttribute('pattern')) {
+            $this->attribute('data-parsley-pattern-message', __('validation.regex', [
+                'attribute' => $label,
+            ]));
+        }
+
+        if ($type === 'email') {
+            $this->attribute('data-parsley-email-message', __('validation.email', [
+                'attribute' => $label,
+            ]));
+        }
+
+        if ($type === 'num') {
+            if ($min = $this->getAttribute('min')) {
+                $this->attribute('data-parsley-min-message', __('validation.min.numeric', [
+                    'attribute' => $label,
+                    'min'       => $min,
+                ]));
+            }
+
+            if ($max = $this->getAttribute('max')) {
+                $this->attribute('data-parsley-max-message', __('validation.max.numeric', [
+                    'attribute' => $label,
+                    'max'       => $max,
+                ]));
+            }
+        }
     }
 
     public function translatable()
